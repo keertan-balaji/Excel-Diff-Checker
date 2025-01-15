@@ -1,47 +1,61 @@
 import pandas as pd
 import streamlit as st
 
+# page parameters
 st.set_page_config(layout="wide")
-st.sidebar.title('Compare two CSV files')
-left_column, right_column = st.columns(2)
+N_COLS = 2
+columns = st.columns(N_COLS)
 
-uploaded_files = st.sidebar.file_uploader("Choose files", accept_multiple_files=True)
-if uploaded_files:
-    frames = []
-    for uploaded_file in uploaded_files:
-        file_name = uploaded_file.name
-        frames.append((file_name, pd.read_excel(uploaded_file, skiprows=9, index_col=0)))
+# function to highlight rows
+def highlight_unique_rows(s):
+    if s['Specification Number'] in cols_unique_df:
+        return ['background-color: red'] * len(s)
+    elif s['Specification Number'] in diff_Qty:
+        return ['background-color: yellow'] * len(s)
+    return [''] * len(s)
+
+# Sidebar
+st.sidebar.title('Excel Diff')
+reference_file = st.sidebar.file_uploader("Choose reference file", accept_multiple_files=False)
+comparing_files = st.sidebar.file_uploader("Choose files to compare with", accept_multiple_files=True)
 
 if st.sidebar.button("Show diff"):
-    if not frames:
-        st.error("Please upload files")
-    elif len(frames) != 2:
-        st.error("Please upload two files")
-    else:
-        name1, df1 = frames[0]
-        name2, df2 = frames[1]
-        
+    st.sidebar.markdown('''<table>
+                        <tr>
+                        <th><div style="width: 50px; height: 50px; background-color: #FF5733; border: 0px solid black;"></div></th>
+                        <th><p style="font-size: 16px; color: white; text-align: center;">Spec Number not in referece file</p></th>
+                        </tr>
+                        <tr>
+                        <th><div style="width: 50px; height: 50px; background-color: #FFFF00; border: 0px solid black;"></div></th>
+                        <th><p style="font-size: 16px; color: white; text-align: center;">Spec Number with different Qty</p></th>
+                        </tr>
+                        </table>''',
+                         unsafe_allow_html=True)
+    if not reference_file:
+        st.error("Please upload reference file")
+    if not comparing_files:
+        st.error("Please upload comparing files")
+
+    # Read reference file
+    reference_df = pd.read_excel(reference_file, index_col=0, skiprows=9)
+    columns[0].title("Reference Table: " + reference_file.name)
+    columns[0].dataframe(reference_df)
+
+    # Read files to be compared
+    comparing_frames = []
+    for file in comparing_files:
+        file_name = file.name
+        comparing_frames.append((file_name, pd.read_excel(file, skiprows=9, index_col=0)))
+
+    for i,frame in enumerate(comparing_frames):        
         # Display tables in columns
-        left_column.title(f"Table: {name1}")
-        right_column.title(f"Table: {name2}")
+        name, df = frame
+        columns[(i+1)%N_COLS].title(f"Table: {name}")
         
         # Identify unique specification numbers
-        cols_unique_d1 = list(df1[~df1["Specification Number"].isin(df2["Specification Number"])]["Specification Number"])
-        cols_unique_d2 = list(df2[~df2["Specification Number"].isin(df1["Specification Number"])]["Specification Number"])
+        cols_unique_df = list(df[~df["Specification Number"].isin(reference_df["Specification Number"])]["Specification Number"])
 
-        merged_table = pd.merge(df1, df2, on='Specification Number', suffixes=('_df1', '_df2'))
+        merged_table = pd.merge(df, reference_df, on='Specification Number', suffixes=('_df1', '_df2'))
         diff_Qty = list(merged_table[merged_table['Qty_df1'] != merged_table['Qty_df2']]["Specification Number"])
-        print(diff_Qty)
-        # Highlight unique rows
-        def highlight_unique_rows(s):
-            if s['Specification Number'] in cols_unique_d1:
-                return ['background-color: red'] * len(s)
-            elif s['Specification Number'] in cols_unique_d2:
-                return ['background-color: red'] * len(s)
-            elif s['Specification Number'] in diff_Qty:
-                return ['background-color: yellow'] * len(s)
-            return [''] * len(s)
-
         # Show the tables with highlights
-        left_column.dataframe(df1.style.apply(highlight_unique_rows, axis=1))
-        right_column.dataframe(df2.style.apply(highlight_unique_rows, axis=1))
+        columns[(i+1)%N_COLS].dataframe(df.style.apply(highlight_unique_rows, axis=1))
