@@ -10,3 +10,4 @@ wheels/
 .venv
 #UV Config File
 uv.lock
+.python-version
