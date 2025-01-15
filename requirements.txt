@@ -1,6 +1,0 @@
-altair
-xlrd
-numpy
-pandas
-streamlit
-openpyxl
