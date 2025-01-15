@@ -5,10 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
-    "cx-freeze>=7.2.8",
     "openpyxl>=3.1.5",
     "pandas>=2.2.3",
-    "pyinstaller>=6.11.1",
     "streamlit>=1.41.1",
     "xlrd>=2.0.1",
 ]
