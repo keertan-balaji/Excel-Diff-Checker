@@ -2,9 +2,9 @@ import pandas as pd
 import streamlit as st
 
 # page parameters
-st.set_page_config(layout="wide")
-N_COLS = 2
-columns = st.columns(N_COLS)
+st.set_page_config(layout="wide",initial_sidebar_state="expanded")
+
+st.session_state.sidebar_state = True 
 
 # function to highlight rows
 def highlight_unique_rows(s):
@@ -13,6 +13,20 @@ def highlight_unique_rows(s):
     elif s['Specification Number'] in diff_Qty:
         return ['background-color: yellow'] * len(s)
     return [''] * len(s)
+
+st.markdown(
+    """
+    <style>
+    .scrolling-wrapper {
+        display: flex;
+        overflow-x: auto;
+    }
+    .scrolling-wrapper > div {
+        margin-right: 10px;
+    }
+    </style>
+    """, unsafe_allow_html=True
+)
 
 # Sidebar
 st.sidebar.title('Excel Diff')
@@ -31,6 +45,7 @@ if st.sidebar.button("Show diff"):
                         </tr>
                         </table>''',
                          unsafe_allow_html=True)
+    st.session_state.sidebar_state = False
     if not reference_file:
         st.error("Please upload reference file")
     if not comparing_files:
@@ -38,24 +53,28 @@ if st.sidebar.button("Show diff"):
 
     # Read reference file
     reference_df = pd.read_excel(reference_file, index_col=0, skiprows=9)
-    columns[0].title("Ref: " + reference_file.name)
-    columns[0].dataframe(reference_df)
-
+    st.title("Ref: " + reference_file.name)
+    st.dataframe(reference_df)
     # Read files to be compared
     comparing_frames = []
     for file in comparing_files:
         file_name = file.name
         comparing_frames.append((file_name, pd.read_excel(file, skiprows=9, index_col=0)))
+    
+    st.markdown('<div class="scrolling-wrapper">', unsafe_allow_html=True)
+    with st.container():
+        cols = st.columns(len(comparing_frames))
+        for i,frame in enumerate(comparing_frames):        
+            # Display tables in columns
+            name, df = frame
+            cols[i].title(f"{name}")
+            
+            # Identify unique specification numbers
+            cols_unique_df = list(df[~df["Specification Number"].isin(reference_df["Specification Number"])]["Specification Number"])
 
-    for i,frame in enumerate(comparing_frames):        
-        # Display tables in columns
-        name, df = frame
-        columns[(i+1)%N_COLS].title(f"{name}")
-        
-        # Identify unique specification numbers
-        cols_unique_df = list(df[~df["Specification Number"].isin(reference_df["Specification Number"])]["Specification Number"])
-
-        merged_table = pd.merge(df, reference_df, on='Specification Number', suffixes=('_df1', '_df2'))
-        diff_Qty = list(merged_table[merged_table['Qty_df1'] != merged_table['Qty_df2']]["Specification Number"])
-        # Show the tables with highlights
-        columns[(i+1)%N_COLS].dataframe(df.style.apply(highlight_unique_rows, axis=1))
+            merged_table = pd.merge(df, reference_df, on='Specification Number', suffixes=('_df1', '_df2'))
+            diff_Qty = list(merged_table[merged_table['Qty_df1'] != merged_table['Qty_df2']]["Specification Number"])
+            # Show the tables with highlights
+            cols[i].dataframe(df.style.apply(highlight_unique_rows, axis=1))
+    
+    st.markdown('</div>', unsafe_allow_html=True)
