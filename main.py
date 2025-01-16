@@ -19,6 +19,7 @@ st.sidebar.title('Excel Diff')
 reference_file = st.sidebar.file_uploader("Choose reference file", accept_multiple_files=False)
 comparing_files = st.sidebar.file_uploader("Choose files to compare with", accept_multiple_files=True)
 
+#Button to perform check Difference
 if st.sidebar.button("Show diff"):
     st.sidebar.markdown(f'''<table>
                         <tr>
