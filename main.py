@@ -38,7 +38,9 @@ if st.sidebar.button("Show diff"):
 
     # Read reference file
     reference_df = pd.read_excel(reference_file, index_col=0, skiprows=9)
+
     columns[0].title("Ref: " + reference_file.name)
+    columns[0].write(f'''<p style="color: #0E1117;">...</p>''', unsafe_allow_html=True)
     columns[0].dataframe(reference_df)
 
     # Read files to be compared
@@ -57,5 +59,13 @@ if st.sidebar.button("Show diff"):
 
         merged_table = pd.merge(df, reference_df, on='Specification Number', suffixes=('_df1', '_df2'))
         diff_Qty = list(merged_table[merged_table['Qty_df1'] != merged_table['Qty_df2']]["Specification Number"])
-        # Show the tables with highlights
+        
+        #Calculate similarity
+        count_common = len(list(reference_df[reference_df["Specification Number"].isin(df["Specification Number"])]["Specification Number"]))
+        # count_unique_in_df = len(cols_unique_df)
+        # count_common = len(reference_df) - count_unique_in_ref
+
+        # similarity = (count_common/(count_unique_in_ref + count_unique_in_df + count_common))*100
+        similarity = (count_common/len(reference_df))*100
+        columns[(i+1)%N_COLS].write(f"Simillarity: {similarity:0.2f}%")
         columns[(i+1)%N_COLS].dataframe(df.style.apply(highlight_unique_rows, axis=1))
