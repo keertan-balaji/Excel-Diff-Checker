@@ -23,11 +23,11 @@ if st.sidebar.button("Show diff"):
     st.sidebar.markdown(f'''<table>
                         <tr>
                         <th><div style="width: 50px; height: 50px; background-color: #FF5733; border: 0px solid black;"></div></th>
-                        <th><p style="font-size: 16px; color: white; text-align: center;">Spec Number not in reference file</p></th>
+                        <th><p style="font-size: 16px; color: {st.get_option("theme.textColor")}; text-align: center;">Spec Number not in reference file</p></th>
                         </tr>
                         <tr>
                         <th><div style="width: 50px; height: 50px; background-color: #FFFF00; border: 0px solid black;"></div></th>
-                        <th><p style="font-size: 16px; color: {'white' if st.get_option("theme.base") == "dark" else 'black'}; text-align: center;">Spec Number with different Qty</p></th>
+                        <th><p style="font-size: 16px; color: {st.get_option("theme.textColor")}; text-align: center;">Spec Number with different Qty</p></th>
                         </tr>
                         </table>''',
                          unsafe_allow_html=True)
