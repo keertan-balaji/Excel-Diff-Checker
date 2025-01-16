@@ -38,7 +38,7 @@ if st.sidebar.button("Show diff"):
 
     # Read reference file
     reference_df = pd.read_excel(reference_file, index_col=0, skiprows=9)
-    columns[0].title("Reference Table: " + reference_file.name)
+    columns[0].title("Ref: " + reference_file.name)
     columns[0].dataframe(reference_df)
 
     # Read files to be compared
@@ -50,7 +50,7 @@ if st.sidebar.button("Show diff"):
     for i,frame in enumerate(comparing_frames):        
         # Display tables in columns
         name, df = frame
-        columns[(i+1)%N_COLS].title(f"Table: {name}")
+        columns[(i+1)%N_COLS].title(f"{name}")
         
         # Identify unique specification numbers
         cols_unique_df = list(df[~df["Specification Number"].isin(reference_df["Specification Number"])]["Specification Number"])
