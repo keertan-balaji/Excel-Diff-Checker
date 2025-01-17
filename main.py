@@ -32,9 +32,15 @@ st.sidebar.title('Excel Diff')
 reference_file = st.sidebar.file_uploader("Choose reference file", accept_multiple_files=False)
 comparing_files = st.sidebar.file_uploader("Choose files to compare with", accept_multiple_files=True)
 comparing_frames = None
-#Button to perform check Difference
+
 st.sidebar.title('Check Difference')
-if st.sidebar.button("Show"):
+#Button to perform check Difference
+if (not reference_file) or comparing_files == []:
+    diff_button = st.sidebar.button("Check", disabled=True)
+else:
+    diff_button = st.sidebar.button("Check")
+
+if diff_button:
     st.sidebar.markdown(f'''<table>
                         <tr>
                         <th><div style="width: 50px; height: 50px; background-color: #FF5733; border: 0px solid black;"></div></th>
@@ -46,11 +52,6 @@ if st.sidebar.button("Show"):
                         </tr>
                         </table>''',
                          unsafe_allow_html=True)
-    if not reference_file:
-        st.error("Please upload reference file")
-    if not comparing_files:
-        st.error("Please upload comparing files")
-
     # Read reference file
     reference_df = pd.read_excel(reference_file, index_col=0, skiprows=9)
 
@@ -84,7 +85,11 @@ if st.sidebar.button("Show"):
 
 #Download zip of processed files
 st.sidebar.title('Download Files')
-if st.sidebar.button("Download"):
+if not comparing_files:
+    download_button = st.sidebar.button("Download", disabled=True)
+else:
+    download_button = st.sidebar.button("Download")
+if download_button:
     if comparing_frames is None:
         if not comparing_files:
             st.error("Please upload comparing files")
