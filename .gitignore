@@ -11,4 +11,3 @@ wheels/
 #UV Config File
 uv.lock
 .python-version
-.devcontainer
