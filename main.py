@@ -86,9 +86,10 @@ if st.sidebar.button("Show"):
 st.sidebar.title('Download Files')
 if st.sidebar.button("Download"):
     if comparing_frames is None:
-        while not comparing_files:
+        if not comparing_files:
             st.error("Please upload comparing files")
-        comparing_frames = open_files(comparing_files)
+        else:
+            comparing_frames = open_files(comparing_files)
 
     def create_excel_zip(frames):
     # Create a BytesIO buffer to hold the zip file in memory
