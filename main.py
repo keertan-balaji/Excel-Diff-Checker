@@ -86,7 +86,7 @@ if st.sidebar.button("Show"):
 st.sidebar.title('Download Files')
 if st.sidebar.button("Download"):
     if comparing_frames is None:
-        if not comparing_files:
+        while not comparing_files:
             st.error("Please upload comparing files")
         comparing_frames = open_files(comparing_files)
 
